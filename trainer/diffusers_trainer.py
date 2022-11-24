@@ -234,6 +234,8 @@ class Resize():
         )
 
         try:
+            if not os.path.exists(f'{filename}.txt'):
+                filename = os.path.basename(image_path)
             shutil.copy(
                 os.path.join(args.dataset, f'{filename}.txt'),
                 os.path.join(self.__directory, f'{filename}.txt'),
