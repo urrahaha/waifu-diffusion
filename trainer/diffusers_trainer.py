@@ -91,6 +91,7 @@ parser.add_argument('--inference', dest='enableinference', type=bool_t, default=
 parser.add_argument('--extended_validation', type=bool_t, default='False', help='Perform extended validation of images to catch truncated or corrupt images.')
 parser.add_argument('--no_migration', type=bool_t, default='False', help='Do not perform migration of dataset while the `--resize` flag is active. Migration creates an adjacent folder to the dataset with <dataset_dirname>_cropped.')
 parser.add_argument('--skip_validation', type=bool_t, default='False', help='Skip validation of images, useful for speeding up loading of very large datasets that have already been validated.')
+parser.add_argument('--enable_safety_checker', type=bool_t, default='True', help='Whether or not safety checker is loaded and saved into output model')
 
 args = parser.parse_args()
 
@@ -780,8 +781,8 @@ def main():
                 scheduler=PNDMScheduler(
                     beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", skip_prk_steps=True
                 ),
-                safety_checker=StableDiffusionSafetyChecker.from_pretrained("CompVis/stable-diffusion-safety-checker"),
-                feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"),
+                safety_checker=StableDiffusionSafetyChecker.from_pretrained("CompVis/stable-diffusion-safety-checker") if args.enable_safety_checker else None,
+                feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32") if args.enable_safety_checker else None,
             )
             print(f'saving checkpoint to: {args.output_path}/{args.run_name}_{global_step}')
             pipeline.save_pretrained(f'{args.output_path}/{args.run_name}_{global_step}')
@@ -894,7 +895,7 @@ def main():
                                 tokenizer=tokenizer,
                                 scheduler=scheduler,
                                 safety_checker=None, # disable safety checker to save memory
-                                feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"),
+                                feature_extractor=None # try to disable this too
                             ).to(device)
                             # inference
                             if args.enablewandb:
