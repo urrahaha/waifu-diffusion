@@ -289,6 +289,8 @@ class ImageStore:
     # gets caption by removing the extension from the filename and replacing it with .txt
     def get_caption(self, ref: Tuple[int, int, int]) -> str:
         filename = re.sub('\.[^/.]+$', '', self.image_files[ref[0]]) + '.txt'
+        if not os.path.exists(filename):
+                filename = os.path.basename(self.image_files[ref[0]]) + ".txt"
         with open(filename, 'r', encoding='UTF-8') as f:
             return f.read()
 
